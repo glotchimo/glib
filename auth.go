@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/pkg/browser"
 )
@@ -32,10 +34,17 @@ func authenticate() {
 		REDIRECT_URI,
 		url.QueryEscape("chat:read chat:edit moderator:manage:banned_users")))
 
-	http.HandleFunc("/callback", handleCallback)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/callback", handleCallback)
+
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+
 	go func() {
-		if err := http.ListenAndServe("localhost:8080", nil); err != nil {
-			log.Fatal(err)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
 		}
 	}()
 
@@ -50,6 +59,11 @@ func authenticate() {
 	ACCESS_TOKEN = token.AccessToken
 
 	close(codeChan)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("Server Shutdown Failed:%+v", err)
+	}
 }
 
 func handleCallback(w http.ResponseWriter, r *http.Request) {
