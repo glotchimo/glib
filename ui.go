@@ -10,18 +10,18 @@ import (
 	"golang.org/x/term"
 )
 
-type model struct {
+type glib struct {
 	messages []string
 	input    string
 }
 
-func (m model) Init() tea.Cmd {
+func (m glib) Init() tea.Cmd {
 	authenticate()
 	go listen()
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m glib) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -70,7 +70,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() string {
+func (m glib) View() string {
 	var b strings.Builder
 
 	terminalWidth, terminalHeight, err := term.GetSize(0)
