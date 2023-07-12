@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/muesli/reflow/wordwrap"
+	"golang.org/x/term"
 )
 
 type model struct {
@@ -70,13 +73,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	var b strings.Builder
 
-	for _, msg := range m.messages {
-		b.WriteString(string(msg))
+	terminalWidth, terminalHeight, err := term.GetSize(0)
+	if err != nil {
+		log.Fatal("error getting terminal size: ", err)
+	}
+	numMessages := terminalHeight - 2 // -2 for the input prompt and cursor
+
+	padding := numMessages - len(m.messages)
+	if padding < 0 {
+		padding = 0
+	}
+
+	for i := 0; i < padding; i++ {
 		b.WriteRune('\n')
 	}
 
-	b.WriteString("> ")
-	b.WriteString(m.input)
+	for _, msg := range m.messages {
+		b.WriteString(wordwrap.String(string(msg), terminalWidth))
+		b.WriteRune('\n')
+	}
+
+	b.WriteString("\033[32m>\033[0m ")
+	b.WriteString(wordwrap.String(m.input, terminalWidth-2))
 
 	return b.String()
 }
