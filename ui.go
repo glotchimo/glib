@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/fatih/color"
 	"github.com/muesli/reflow/wordwrap"
 	"golang.org/x/term"
 )
@@ -63,6 +64,12 @@ func (m glib) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case string:
+		if idx := strings.Index(msg, USERNAME); idx != -1 {
+			l := msg[:idx]
+			r := msg[idx+len(USERNAME):]
+			msg = l + color.New(color.FgBlack, color.BgYellow).Sprint(USERNAME) + r
+		}
+
 		m.messages = append(m.messages, msg)
 		return m, nil
 	}
