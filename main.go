@@ -23,7 +23,7 @@ func init() {
 }
 
 func main() {
-	UI = tea.NewProgram(glib{})
+	UI = tea.NewProgram(model{})
 	if err := UI.Start(); err != nil {
 		log.Fatal("error starting program: ", err)
 	}

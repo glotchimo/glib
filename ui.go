@@ -11,18 +11,19 @@ import (
 	"golang.org/x/term"
 )
 
-type glib struct {
+type model struct {
+	users    []string
 	messages []string
 	input    string
 }
 
-func (m glib) Init() tea.Cmd {
+func (m model) Init() tea.Cmd {
 	authenticate()
 	go listen()
 	return nil
 }
 
-func (m glib) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -64,6 +65,7 @@ func (m glib) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case string:
+
 		if idx := strings.Index(msg, USERNAME); idx != -1 {
 			l := msg[:idx]
 			r := msg[idx+len(USERNAME):]
@@ -77,7 +79,7 @@ func (m glib) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m glib) View() string {
+func (m model) View() string {
 	var b strings.Builder
 
 	terminalWidth, terminalHeight, err := term.GetSize(0)
@@ -96,7 +98,7 @@ func (m glib) View() string {
 	}
 
 	for _, msg := range m.messages {
-		b.WriteString(wordwrap.String(string(msg), terminalWidth))
+		b.WriteString(wordwrap.String(msg, terminalWidth))
 		b.WriteRune('\n')
 	}
 
